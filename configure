@@ -617,22 +617,6 @@ else
   esac
 fi
 
-# Symbol versioning
-case "$uname" in
-  CYGWIN* | Cygwin* | cygwin* | MINGW* | mingw* | MSYS* | msys* | Darwin* | darwin*)
-    echo "Checking for Symbol versioning... No."
-  ;;
-  *)
-    if test $shared -eq 1; then
-      echo "Checking for Symbol versioning... Yes."
-      CFLAGS="${CFLAGS} -DHAVE_SYMVER"
-      SFLAGS="${SFLAGS} -DHAVE_SYMVER"
-    else
-      echo "Checking for Symbol versioning... No."
-    fi
-  ;;
-esac
-
 # Simplify some later conditionals
 LINUX=0
 FREEBSD=0
@@ -1162,6 +1146,24 @@ if try ${CC} ${CFLAGS} $test.c $LDSHAREDLIBC; then
     SFLAGS="$SFLAGS -DHAVE_ATTRIBUTE_ALIGNED"
 else
     echo "Checking for attribute(aligned) ... No." | tee -a configure.log
+fi
+
+# Check for attribute(symver) support in compiler
+cat > $test.c << EOF
+void foo(void);
+__attribute__((__symver__("foo@VERS_1.0"))) void foo(void) {}
+int main(void) {
+    return 0;
+}
+EOF
+if try ${CC} ${CFLAGS} $test.c $LDSHAREDLIBC; then
+    echo "Checking for attribute(symver) ... Yes." | tee -a configure.log
+    CFLAGS="$CFLAGS -DHAVE_SYMVER"
+    SFLAGS="$SFLAGS -DHAVE_SYMVER"
+else
+    echo "Checking for attribute(symver) ... No." | tee -a configure.log
+    echo "Warning: Unable to provide support for deprecated functions without '__attribute__((__symver__(x)))'" | tee -a configure.log
+
 fi
 
 # Check for __builtin_assume_aligned(x,n) support in compiler

@@ -171,11 +171,11 @@
  * This is only used for Zlib-ng native API, and only on platforms supporting this.
  */
 #if defined(HAVE_SYMVER)
-#  define ZSYMVER(func,alias,ver) __asm__(".symver " func ", " alias "@ZLIB_NG_" ver);
-#  define ZSYMVER_DEF(func,alias,ver) __asm__(".symver " func ", " alias "@@ZLIB_NG_" ver);
+#  define ZSYMVER(alias,ver) __attribute__((__symver__(alias "@" ver)))
+#  define ZSYMVER_DEF(alias,ver) __attribute__((__symver__(alias "@@" ver)))
 #else
-#  define ZSYMVER(func,alias,ver)
-#  define ZSYMVER_DEF(func,alias,ver)
+#  define ZSYMVER(alias,ver)
+#  define ZSYMVER_DEF(alias,ver)
 #endif
 
 #ifndef __cplusplus
